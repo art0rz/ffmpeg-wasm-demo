@@ -70,7 +70,7 @@ function App() {
                             ? 'Converting...'
                             : state.isDone
                                 ? 'Done!'
-                                : 'Select a file for encoding'}
+                                : 'Select a video file for encoding'}
                 </p>
                 {state.isDone === false && <>
 
