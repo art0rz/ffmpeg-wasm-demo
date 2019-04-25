@@ -35,23 +35,30 @@ function App() {
 
         setState({
             isDone: true,
-            isUnknown: true,
+            isUnknown: false,
             isProcessing: false,
             progress: 0,
             convertedFiles
         });
     };
 
-    if (state.convertedFiles.length > 0) {
-        console.log(state.convertedFiles)
-        state.convertedFiles.forEach((file) => {
-            const url = URL.createObjectURL(file);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'out.mp4';
-            a.click();
-        })
-    }
+    const downloadFile = (file) => {
+        const url = URL.createObjectURL(new Blob([file], {type: 'video/mp4'}));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'out.mp4';
+        a.click();
+    };
+
+    const reset = () => {
+        setState({
+            progress: 0,
+            isUnknown: false,
+            isProcessing: false,
+            isDone: false,
+            convertedFiles: []
+        });
+    };
 
     return (
         <div className="App">
@@ -59,24 +66,39 @@ function App() {
                 <p>
                     {state.isUnknown
                         ? 'Initializing...'
-                        : state.isProcessing === false
-                            ? 'Select a file for encoding'
-                            : 'Converting...'}
+                        : state.isProcessing
+                            ? 'Converting...'
+                            : state.isDone
+                                ? 'Done!'
+                                : 'Select a file for encoding'}
                 </p>
-                <input onChange={onFileChange}
-                       className="input-file"
-                       ref={fileRef}
-                       type={'file'}
-                       role={'button'}/>
-                {state.isProcessing === false
-                && <button onClick={() => fileRef.current.click()}>Select file</button>}
-                {state.isProcessing === true
-                && <progress max={state.isUnknown ? undefined : 1}
-                             value={state.isUnknown ? undefined : state.progress}></progress>}
+                {state.isDone === false && <>
 
-                {state.isDone && state.convertedFiles.map(file => <>
-                    file
-                </>)}
+                    <input onChange={onFileChange}
+                           className="input-file"
+                           ref={fileRef}
+                           type={'file'}
+                           role={'button'}/>
+                    {state.isProcessing === false
+                    && <p>
+                        <button onClick={() => fileRef.current.click()}>Select file</button>
+                    </p>}
+
+                    {state.isProcessing === true
+                    && <p>
+                        <progress max={state.isUnknown ? undefined : 1}
+                                  value={state.isUnknown ? undefined : state.progress}></progress>
+                    </p>}
+
+                </>}
+
+                {state.isDone && <>
+                    {state.convertedFiles.map(file => <p>
+                        <button onClick={() => downloadFile(file)}>Download</button>
+                    </p>)}
+
+                    <p><button onClick={reset}>Restart</button></p>
+                </>}
             </header>
         </div>
     );
